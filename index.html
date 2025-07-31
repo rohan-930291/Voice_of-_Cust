@@ -21,18 +21,14 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             transition: all 0.3s ease;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
         .icon-bg-blue { background-color: #e0f2fe; }
         .icon-bg-green { background-color: #dcfce7; }
         .icon-bg-orange { background-color: #ffedd5; }
-        .icon-bg-red { background-color: #fee2e2; }
         .text-blue-600 { color: #2563eb; }
         .text-green-600 { color: #16a34a; }
         .text-orange-600 { color: #ea580c; }
-        .text-red-600 { color: #dc2626; }
+        
+        /* Filter Styles */
         .filter-input {
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -45,6 +41,26 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
         }
+        .filter-toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        /* Metric Button Styles */
+        .metric-button {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .metric-button:hover {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -77,6 +93,10 @@
         .modal-overlay.active .modal-content {
             transform: scale(1);
         }
+        /* Add cursor pointer to interactive chart canvases */
+        #modelComplaintChart, #zoneWiseChart, #regionWiseChart, #salesPieChart, #servicePieChart {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -97,105 +117,73 @@
 
         <!-- Global Filter Section -->
         <div class="card mb-8">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Filter Options</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div>
-                    <label for="chassis-no" class="block text-sm font-medium text-gray-600 mb-1">Chassis/Complaint No.</label>
-                    <input type="text" id="chassis-no" class="filter-input" placeholder="Enter No.">
-                </div>
-                 <div>
-                    <label for="date-filter" class="block text-sm font-medium text-gray-600 mb-1">Date</label>
-                    <input type="date" id="date-filter" class="filter-input">
-                </div>
-                <div>
-                    <label for="state-filter" class="block text-sm font-medium text-gray-600 mb-1">State</label>
-                    <select id="state-filter" class="filter-input">
-                        <option>All</option>
-                        <option>Maharashtra</option>
-                        <option>Delhi</option>
-                        <option>Karnataka</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="city-filter" class="block text-sm font-medium text-gray-600 mb-1">City</label>
-                    <select id="city-filter" class="filter-input">
-                        <option>All</option>
-                        <option>Mumbai</option>
-                        <option>Pune</option>
-                        <option>Nagpur</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="zone-filter" class="block text-sm font-medium text-gray-600 mb-1">Zone</label>
-                    <select id="zone-filter" class="filter-input">
-                        <option>All</option>
-                        <option>West</option>
-                        <option>North</option>
-                        <option>South</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="region-filter" class="block text-sm font-medium text-gray-600 mb-1">Region</label>
-                    <select id="region-filter" class="filter-input">
-                        <option>All</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="dealer-filter" class="block text-sm font-medium text-gray-600 mb-1">DealerName</label>
-                    <select id="dealer-filter" class="filter-input">
-                        <option>All</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="ppl-filter" class="block text-sm font-medium text-gray-600 mb-1">PPL</label>
-                    <select id="ppl-filter" class="filter-input">
-                        <option>All</option>
-                    </select>
-                </div>
-                 <div>
-                    <label for="pl-filter" class="block text-sm font-medium text-gray-600 mb-1">PL</label>
-                    <select id="pl-filter" class="filter-input">
-                        <option>All</option>
-                    </select>
+            <button id="filter-toggle" class="w-full flex justify-between items-center text-left">
+                <h3 class="text-xl font-semibold text-gray-700">Filter Options</h3>
+                <svg id="filter-icon" class="w-6 h-6 text-gray-500 filter-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="filter-content" class="hidden mt-4 pt-4 border-t">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div><label for="chassis-no" class="block text-sm font-medium text-gray-600 mb-1">Chassis/Complaint No.</label><input type="text" id="chassis-no" class="filter-input" placeholder="Enter No."></div>
+                    <div><label for="date-filter" class="block text-sm font-medium text-gray-600 mb-1">Date</label><input type="date" id="date-filter" class="filter-input"></div>
+                    <div><label for="state-filter" class="block text-sm font-medium text-gray-600 mb-1">State</label><select id="state-filter" class="filter-input"><option>All</option><option>Maharashtra</option><option>Delhi</option><option>Karnataka</option></select></div>
+                    <div><label for="city-filter" class="block text-sm font-medium text-gray-600 mb-1">City</label><select id="city-filter" class="filter-input"><option>All</option><option>Mumbai</option><option>Pune</option><option>Nagpur</option></select></div>
+                    <div><label for="zone-filter" class="block text-sm font-medium text-gray-600 mb-1">Zone</label><select id="zone-filter" class="filter-input"><option>All</option><option>West</option><option>North</option><option>South</option></select></div>
+                    <div><label for="region-filter" class="block text-sm font-medium text-gray-600 mb-1">Region</label><select id="region-filter" class="filter-input"><option>All</option></select></div>
+                    <div><label for="dealer-filter" class="block text-sm font-medium text-gray-600 mb-1">DealerName</label><select id="dealer-filter" class="filter-input"><option>All</option></select></div>
+                    <div><label for="ppl-filter" class="block text-sm font-medium text-gray-600 mb-1">PPL</label><select id="ppl-filter" class="filter-input"><option>All</option></select></div>
+                    <div><label for="pl-filter" class="block text-sm font-medium text-gray-600 mb-1">PL</label><select id="pl-filter" class="filter-input"><option>All</option></select></div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-medium text-gray-600">Sales Complaints</h3>
-                    <div class="p-2 icon-bg-blue rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg></div>
+        <!-- Vertically Stacked Complaints Section -->
+        <div class="card mb-8">
+            <!-- Overall Section -->
+            <div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">Overall</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card border border-gray-200">
+                        <div class="flex justify-between items-center"><h3 class="text-lg font-medium text-gray-600">Sales Complaints</h3><div class="p-2 icon-bg-blue rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg></div></div>
+                        <p class="text-4xl font-bold text-gray-800 mt-2">657</p>
+                        <div class="mt-4 flex space-x-2"><button class="metric-button" data-metric="TAT" data-category="Sales">TAT</button><button class="metric-button" data-metric="CPTV" data-category="Sales">CPTV</button></div>
+                    </div>
+                    <div class="card border border-gray-200">
+                        <div class="flex justify-between items-center"><h3 class="text-lg font-medium text-gray-600">Service Complaints</h3><div class="p-2 icon-bg-green rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10s5 2 5 2l-2.657 2.657m0 0a2 2 0 102.828 2.828l2.657-2.657-2.828-2.828z" /></svg></div></div>
+                        <p class="text-4xl font-bold text-gray-800 mt-2">935</p>
+                        <div class="mt-4 flex space-x-2"><button class="metric-button" data-metric="TAT" data-category="Service">TAT</button><button class="metric-button" data-metric="CPTV" data-category="Service">CPTV</button></div>
+                    </div>
+                    <div class="card border border-gray-200">
+                        <div class="flex justify-between items-center"><h3 class="text-lg font-medium text-gray-600">Product Issues</h3><div class="p-2 icon-bg-orange rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div></div>
+                        <p class="text-4xl font-bold text-gray-800 mt-2">508</p>
+                        <div class="mt-4 flex space-x-2"><button class="metric-button" data-metric="TAT" data-category="Product">TAT</button><button class="metric-button" data-metric="CPTV" data-category="Product">CPTV</button></div>
+                    </div>
                 </div>
-                <p class="text-4xl font-bold text-gray-800 mt-2">657</p><p class="text-sm text-gray-500">31.3% of total complaints</p>
             </div>
-            <div class="card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-medium text-gray-600">Service Complaints</h3>
-                     <div class="p-2 icon-bg-green rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10s5 2 5 2l-2.657 2.657m0 0a2 2 0 102.828 2.828l2.657-2.657-2.828-2.828z" /></svg></div>
+
+            <!-- Social Media Section -->
+            <div class="mt-8 pt-6 border-t">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Social Media</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card border border-gray-200"><h3 class="text-lg font-medium text-gray-600">Sales Complaints</h3><p class="text-4xl font-bold text-gray-800 mt-2">65</p></div>
+                    <div class="card border border-gray-200"><h3 class="text-lg font-medium text-gray-600">Service Complaints</h3><p class="text-4xl font-bold text-gray-800 mt-2">93</p></div>
+                    <div class="card border border-gray-200"><h3 class="text-lg font-medium text-gray-600">Product Issues</h3><p class="text-4xl font-bold text-gray-800 mt-2">51</p></div>
                 </div>
-                <p class="text-4xl font-bold text-gray-800 mt-2">935</p><p class="text-sm text-gray-500">44.5% of total complaints</p>
             </div>
-            <div class="card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-medium text-gray-600">Product Issues</h3>
-                    <div class="p-2 icon-bg-orange rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+
+            <!-- Escalated Section -->
+            <div class="mt-8 pt-6 border-t">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Escalated</h3>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card border border-gray-200"><h3 class="text-lg font-medium text-gray-600">Sales Complaints</h3><p class="text-4xl font-bold text-gray-800 mt-2">12</p></div>
+                    <div class="card border border-gray-200"><h3 class="text-lg font-medium text-gray-600">Service Complaints</h3><p class="text-4xl font-bold text-gray-800 mt-2">19</p></div>
+                    <div class="card border border-gray-200"><h3 class="text-lg font-medium text-gray-600">Product Issues</h3><p class="text-4xl font-bold text-gray-800 mt-2">8</p></div>
                 </div>
-                <p class="text-4xl font-bold text-gray-800 mt-2">508</p><p class="text-sm text-gray-500">24.2% of total complaints</p>
             </div>
-        </div>
-        
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-8 flex justify-between items-center">
-            <div class="flex items-center">
-                <div class="p-2 icon-bg-red rounded-full mr-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>
-                <div><p class="font-bold">Critical Alert: Tata Nexon</p><p class="text-sm">Highest product complaint volume</p></div>
-            </div>
-            <div class="text-right"><p class="text-3xl font-bold text-red-600">238</p><p class="text-sm text-red-500">Product Issues</p></div>
         </div>
 
+        <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="card"><h3 class="text-lg font-medium text-gray-600 mb-4">Weekly Complaint Trend</h3><div class="h-80 relative"><canvas id="weeklyTrendChart"></canvas></div></div>
+            <div class="card"><h3 class="text-lg font-medium text-gray-600 mb-4">Monthly Complaint Trend</h3><div class="h-80 relative"><canvas id="monthlyTrendChart"></canvas></div></div>
             <div class="card"><h3 class="text-lg font-medium text-gray-600 mb-4">Complaints by Model</h3><div class="h-80 relative"><canvas id="modelComplaintChart"></canvas></div></div>
         </div>
 
@@ -208,18 +196,12 @@
             <div class="card">
                 <h3 class="text-lg font-medium text-gray-600 mb-4">Sales Issue Analysis</h3>
                 <p class="text-sm text-gray-400 -mt-4 mb-4">Click on a section to see the monthly trend.</p>
-                <div class="flex flex-col md:flex-row items-center">
-                    <div class="w-full md:w-1/2 h-64 relative cursor-pointer"><canvas id="salesPieChart"></canvas></div>
-                    <div id="sales-legend" class="w-full md:w-1/2 mt-4 md:mt-0 md:pl-6 text-sm text-gray-600"></div>
-                </div>
+                <div class="flex flex-col md:flex-row items-center"><div class="w-full md:w-1/2 h-64 relative cursor-pointer"><canvas id="salesPieChart"></canvas></div><div id="sales-legend" class="w-full md:w-1/2 mt-4 md:mt-0 md:pl-6 text-sm text-gray-600"></div></div>
             </div>
             <div class="card">
                 <h3 class="text-lg font-medium text-gray-600 mb-4">Service Issue Analysis</h3>
                 <p class="text-sm text-gray-400 -mt-4 mb-4">Click on a section to see the monthly trend.</p>
-                 <div class="flex flex-col md:flex-row items-center">
-                    <div class="w-full md:w-1/2 h-64 relative cursor-pointer"><canvas id="servicePieChart"></canvas></div>
-                    <div id="service-legend" class="w-full md:w-1/2 mt-4 md:mt-0 md:pl-6 text-sm text-gray-600"></div>
-                </div>
+                <div class="flex flex-col md:flex-row items-center"><div class="w-full md:w-1/2 h-64 relative cursor-pointer"><canvas id="servicePieChart"></canvas></div><div id="service-legend" class="w-full md:w-1/2 mt-4 md:mt-0 md:pl-6 text-sm text-gray-600"></div></div>
             </div>
         </div>
     </div>
@@ -228,141 +210,145 @@
     <div id="trend-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="modal-title" class="text-2xl font-bold text-gray-800">Issue Trend Analysis</h2>
+                <h2 id="modal-title" class="text-2xl font-bold text-gray-800"></h2>
                 <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
             </div>
-            <p id="modal-subtitle" class="text-gray-500 mb-6">6-Month chronological analysis of customer issues.</p>
-            <div class="h-96 relative">
-                <canvas id="modalTrendChart"></canvas>
-            </div>
+            <p id="modal-subtitle" class="text-gray-500 mb-6">6-Month chronological analysis.</p>
+            <div class="h-96 relative"><canvas id="modalTrendChart"></canvas></div>
         </div>
     </div>
 
-
     <script>
-        // Data and configuration for charts
-        const weeklyTrendCtx = document.getElementById('weeklyTrendChart').getContext('2d');
-        new Chart(weeklyTrendCtx, {
-            type: 'line',
-            data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'], datasets: [{ label: 'Sales', data: [450, 150, 180, 160, 170, 155], borderColor: '#3b82f6', tension: 0.4, fill: false, }, { label: 'Service', data: [600, 250, 280, 260, 270, 255], borderColor: '#22c55e', tension: 0.4, fill: false, }, { label: 'Product', data: [350, 100, 120, 110, 115, 105], borderColor: '#f97316', tension: 0.4, fill: false, }] },
-            options: { responsive: true, maintainAspectRatio: false }
+        // --- Setup and Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Filter Toggle
+            const filterToggle = document.getElementById('filter-toggle');
+            const filterContent = document.getElementById('filter-content');
+            const filterIcon = document.getElementById('filter-icon');
+            filterToggle.addEventListener('click', () => {
+                filterContent.classList.toggle('hidden');
+                filterIcon.classList.toggle('rotate-180');
+            });
+
+            // Modal
+            const modal = document.getElementById('trend-modal');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const closeModal = () => modal.classList.remove('active');
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
         });
 
-        const modelComplaintCtx = document.getElementById('modelComplaintChart').getContext('2d');
-        new Chart(modelComplaintCtx, {
-            type: 'bar',
-            data: { labels: ['Nexon', 'Punch', 'Harrier', 'Safari', 'Altroz', 'Tiago', 'Tigor'], datasets: [{ label: 'Sales', data: [180, 80, 60, 50, 40, 30, 20], backgroundColor: '#3b82f6', }, { label: 'Service', data: [250, 120, 90, 80, 70, 60, 50], backgroundColor: '#22c55e', }, { label: 'Product', data: [238, 90, 70, 60, 50, 40, 30], backgroundColor: '#f97316', }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
-        });
+        // --- Chart Data ---
+        const monthLabels = ['February', 'March', 'April', 'May', 'June', 'July'];
+        const salesPieData = { labels: ['Attitude', 'Delay in Delivery', 'Commitment & Responsiveness', 'Finance', 'Accessory Delivery', 'Registration', 'Vehicle Delivery', 'Test Drive', 'Warranty/AMC/EW'], datasets: [{ data: [32.2, 20.2, 12.1, 10.1, 8.1, 6.1, 5.1, 3.0, 3.0], backgroundColor: ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff', '#e0f2fe'], }] };
+        const servicePieData = { labels: ['Motor Quality', 'Service Advisor', 'Service Time', 'Part Availability', 'Service Cost', 'TMI Insurance', 'Vehicle Mismanaged', 'Paint Defect'], datasets: [{ data: [34.5, 24.0, 10.8, 11.1, 6.0, 3.1, 5.2, 5.3], backgroundColor: ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5', '#f0fdf4', '#bbf7d0'], }] };
+        const modelData = { labels: ['Nexon', 'Punch', 'Harrier', 'Safari', 'Altroz', 'Tiago', 'Tigor'], datasets: [{ label: 'Sales', data: [180, 80, 60, 50, 40, 30, 20], backgroundColor: '#3b82f6', }, { label: 'Service', data: [250, 120, 90, 80, 70, 60, 50], backgroundColor: '#22c55e', }, { label: 'Product', data: [238, 90, 70, 60, 50, 40, 30], backgroundColor: '#f97316', }] };
+        const zoneData = { labels: ['North', 'South', 'West', 'East', 'Central', 'North Central'], datasets: [{ label: 'Complaints', data: [312, 388, 279, 361, 400, 360], backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'], borderWidth: 1 }] };
+        const regionData = { labels: ['North', 'South', 'West', 'East', 'Central', 'North Central'], datasets: [ { label: 'Region 1', data: [101, 129, 91, 122, 131, 119], backgroundColor: 'rgba(54, 162, 235, 0.7)', }, { label: 'Region 2', data: [105, 127, 94, 120, 135, 121], backgroundColor: 'rgba(75, 192, 192, 0.7)', }, { label: 'Region 3', data: [106, 132, 94, 119, 134, 120], backgroundColor: 'rgba(153, 102, 255, 0.7)', } ] };
 
-        const zoneWiseCtx = document.getElementById('zoneWiseChart').getContext('2d');
-        new Chart(zoneWiseCtx, {
-            type: 'bar',
-            data: { labels: ['North', 'South', 'West', 'East', 'Central', 'North Central'], datasets: [{ label: 'Complaints', data: [312, 388, 279, 361, 400, 360], backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'], borderWidth: 1 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
+        // Dummy trend data generation
+        const generateDummyTrend = (multiplier = 1) => Array.from({ length: 6 }, () => Math.floor(Math.random() * 50 * multiplier) + 10);
+        const salesIssueTrendData = Object.fromEntries(salesPieData.labels.map(label => [label, generateDummyTrend()]));
+        const serviceIssueTrendData = Object.fromEntries(servicePieData.labels.map(label => [label, generateDummyTrend()]));
+        const metricTrendData = { Sales: { TAT: generateDummyTrend(0.5), CPTV: generateDummyTrend(0.2) }, Service: { TAT: generateDummyTrend(0.8), CPTV: generateDummyTrend(0.3) }, Product: { TAT: generateDummyTrend(0.4), CPTV: generateDummyTrend(0.6) }, };
+        const modelTrendData = Object.fromEntries(modelData.labels.map(label => [label, { Sales: generateDummyTrend(), Service: generateDummyTrend(), Product: generateDummyTrend() }]));
+        const zoneTrendData = Object.fromEntries(zoneData.labels.map(label => [label, generateDummyTrend()]));
+        const regionTrendData = Object.fromEntries(regionData.labels.map(zone => [zone, { 'Region 1': generateDummyTrend(), 'Region 2': generateDummyTrend(), 'Region 3': generateDummyTrend() }]));
 
-        const regionWiseCtx = document.getElementById('regionWiseChart').getContext('2d');
-        new Chart(regionWiseCtx, {
-            type: 'bar',
-            data: { labels: ['North', 'South', 'West', 'East', 'Central', 'North Central'], datasets: [ { label: 'Region 1', data: [101, 129, 91, 122, 131, 119], backgroundColor: 'rgba(54, 162, 235, 0.7)', }, { label: 'Region 2', data: [105, 127, 94, 120, 135, 121], backgroundColor: 'rgba(75, 192, 192, 0.7)', }, { label: 'Region 3', data: [106, 132, 94, 119, 134, 120], backgroundColor: 'rgba(153, 102, 255, 0.7)', } ] },
-            options: { responsive: true, maintainAspectRatio: false, }
-        });
-
-        // --- Interactive Pie Chart Logic ---
-        
-        const salesPieData = {
-            labels: ['Attitude', 'Delay in Delivery', 'Commitment & Responsiveness', 'Finance', 'Accessory Delivery', 'Registration', 'Vehicle Delivery', 'Test Drive', 'Warranty/AMC/EW'],
-            datasets: [{ data: [32.2, 20.2, 12.1, 10.1, 8.1, 6.1, 5.1, 3.0, 3.0], backgroundColor: ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff', '#e0f2fe'], }]
-        };
-
-        const servicePieData = {
-            labels: ['Motor Quality', 'Service Advisor', 'Service Time', 'Part Availability', 'Service Cost', 'TMI Insurance', 'Vehicle Mismanaged', 'Paint Defect'],
-            datasets: [{ data: [34.5, 24.0, 10.8, 11.1, 6.0, 3.1, 5.2, 5.3], backgroundColor: ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5', '#f0fdf4', '#bbf7d0'], }]
-        };
-
-        // Dummy trend data for 6 months
-        const generateDummyTrend = () => Array.from({ length: 6 }, () => Math.floor(Math.random() * 50) + 10);
-        const salesTrendData = Object.fromEntries(salesPieData.labels.map(label => [label, generateDummyTrend()]));
-        const serviceTrendData = Object.fromEntries(servicePieData.labels.map(label => [label, generateDummyTrend()]));
-        
-        const modal = document.getElementById('trend-modal');
+        // --- Modal Logic ---
         const modalTitle = document.getElementById('modal-title');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
         const modalTrendChartCtx = document.getElementById('modalTrendChart').getContext('2d');
         let modalChartInstance = null;
         
-        const openModal = (category, trendData) => {
-            modalTitle.textContent = `${category} - Monthly Trend`;
-            if (modalChartInstance) {
-                modalChartInstance.destroy();
-            }
+        function openModal(title, trendData) {
+            modalTitle.textContent = title;
+            if (modalChartInstance) modalChartInstance.destroy();
             modalChartInstance = new Chart(modalTrendChartCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: category,
-                        data: trendData,
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
+                    labels: monthLabels,
+                    datasets: [{ label: title, data: trendData, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
-            modal.classList.add('active');
-        };
+            document.getElementById('trend-modal').classList.add('active');
+        }
 
-        const closeModal = () => modal.classList.remove('active');
-        modalCloseBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        const createPieChart = (ctx, chartData, legendContainerId, trendData) => {
+        // --- Chart Initialization ---
+        const createPieChart = (ctx, chartData, legendContainerId, trendDataSource) => {
             const chart = new Chart(ctx, {
                 type: 'pie',
                 data: chartData,
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                     onClick: (evt, elements) => {
                         if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const category = chartData.labels[index];
-                            openModal(category, trendData[category]);
+                            const category = chartData.labels[elements[0].index];
+                            openModal(`${category} - Monthly Trend`, trendDataSource[category]);
                         }
                     }
                 }
             });
-            
-            // Custom Legend
             const legendContainer = document.getElementById(legendContainerId);
             const ul = document.createElement('ul');
             ul.className = 'space-y-2';
             chartData.labels.forEach((label, index) => {
-                const value = chartData.datasets[0].data[index];
-                const color = chartData.datasets[0].backgroundColor[index];
-                const li = document.createElement('li');
-                li.className = 'flex items-center justify-between';
-                li.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></span>
-                        <span>${label}</span>
-                    </div>
-                    <strong>${value}%</strong>
-                `;
-                ul.appendChild(li);
+                ul.innerHTML += `<li class="flex items-center justify-between">
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full mr-2" style="background-color: ${chartData.datasets[0].backgroundColor[index]};"></span><span>${label}</span></div>
+                    <strong>${chartData.datasets[0].data[index]}%</strong></li>`;
             });
             legendContainer.innerHTML = '';
             legendContainer.appendChild(ul);
         };
+        createPieChart(document.getElementById('salesPieChart').getContext('2d'), salesPieData, 'sales-legend', salesIssueTrendData);
+        createPieChart(document.getElementById('servicePieChart').getContext('2d'), servicePieData, 'service-legend', serviceIssueTrendData);
 
-        createPieChart(document.getElementById('salesPieChart').getContext('2d'), salesPieData, 'sales-legend', salesTrendData);
-        createPieChart(document.getElementById('servicePieChart').getContext('2d'), servicePieData, 'service-legend', serviceTrendData);
+        document.querySelectorAll('.metric-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const metric = button.dataset.metric;
+                const category = button.dataset.category;
+                openModal(`${category} - ${metric} Trend`, metricTrendData[category][metric]);
+            });
+        });
+
+        // Main Monthly Trend Chart
+        new Chart(document.getElementById('monthlyTrendChart').getContext('2d'), { type: 'line', data: { labels: monthLabels, datasets: [{ label: 'Sales', data: [150, 180, 160, 190, 210, 185], borderColor: '#3b82f6', tension: 0.4, fill: false, }, { label: 'Service', data: [250, 280, 260, 300, 320, 290], borderColor: '#22c55e', tension: 0.4, fill: false, }, { label: 'Product', data: [100, 120, 110, 140, 150, 130], borderColor: '#f97316', tension: 0.4, fill: false, }] }, options: { responsive: true, maintainAspectRatio: false } });
+        
+        // Interactive Bar Charts
+        const createInteractiveBarChart = (ctx, chartData, trendDataSource, isStacked = false) => {
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { stacked: isStacked }, y: { stacked: isStacked } },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const { datasetIndex, index } = elements[0];
+                            const dataLabel = chartData.labels[index];
+                            let category;
+                            let trendData;
+                            if (isStacked) { // For Model chart
+                                category = chartData.datasets[datasetIndex].label;
+                                trendData = trendDataSource[dataLabel][category];
+                                openModal(`${dataLabel} - ${category} Trend`, trendData);
+                            } else if (chartData.datasets.length > 1) { // For Region chart
+                                category = chartData.datasets[datasetIndex].label;
+                                trendData = trendDataSource[dataLabel][category];
+                                openModal(`${dataLabel} - ${category} Trend`, trendData);
+                            } else { // For Zone chart
+                                trendData = trendDataSource[dataLabel];
+                                openModal(`${dataLabel} - Monthly Trend`, trendData);
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        createInteractiveBarChart(document.getElementById('modelComplaintChart').getContext('2d'), modelData, modelTrendData, true);
+        createInteractiveBarChart(document.getElementById('zoneWiseChart').getContext('2d'), zoneData, zoneTrendData, false);
+        createInteractiveBarChart(document.getElementById('regionWiseChart').getContext('2d'), regionData, regionTrendData, false);
 
     </script>
 </body>
