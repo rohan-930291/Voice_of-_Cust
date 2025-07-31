@@ -95,6 +95,72 @@
             </div>
         </header>
 
+        <!-- Global Filter Section -->
+        <div class="card mb-8">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Filter Options</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div>
+                    <label for="chassis-no" class="block text-sm font-medium text-gray-600 mb-1">Chassis/Complaint No.</label>
+                    <input type="text" id="chassis-no" class="filter-input" placeholder="Enter No.">
+                </div>
+                 <div>
+                    <label for="date-filter" class="block text-sm font-medium text-gray-600 mb-1">Date</label>
+                    <input type="date" id="date-filter" class="filter-input">
+                </div>
+                <div>
+                    <label for="state-filter" class="block text-sm font-medium text-gray-600 mb-1">State</label>
+                    <select id="state-filter" class="filter-input">
+                        <option>All</option>
+                        <option>Maharashtra</option>
+                        <option>Delhi</option>
+                        <option>Karnataka</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="city-filter" class="block text-sm font-medium text-gray-600 mb-1">City</label>
+                    <select id="city-filter" class="filter-input">
+                        <option>All</option>
+                        <option>Mumbai</option>
+                        <option>Pune</option>
+                        <option>Nagpur</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="zone-filter" class="block text-sm font-medium text-gray-600 mb-1">Zone</label>
+                    <select id="zone-filter" class="filter-input">
+                        <option>All</option>
+                        <option>West</option>
+                        <option>North</option>
+                        <option>South</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="region-filter" class="block text-sm font-medium text-gray-600 mb-1">Region</label>
+                    <select id="region-filter" class="filter-input">
+                        <option>All</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="dealer-filter" class="block text-sm font-medium text-gray-600 mb-1">DealerName</label>
+                    <select id="dealer-filter" class="filter-input">
+                        <option>All</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="ppl-filter" class="block text-sm font-medium text-gray-600 mb-1">PPL</label>
+                    <select id="ppl-filter" class="filter-input">
+                        <option>All</option>
+                    </select>
+                </div>
+                 <div>
+                    <label for="pl-filter" class="block text-sm font-medium text-gray-600 mb-1">PL</label>
+                    <select id="pl-filter" class="filter-input">
+                        <option>All</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="card">
